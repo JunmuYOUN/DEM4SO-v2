@@ -1,0 +1,17 @@
+{
+  "k_factor": 1.4,
+  "source": "hri174_response.npy",
+  "source_sha256": "3426a6d5c078535c154d229f8c4c51bf21fb0644e7e01bafe0f52b3ea4387ee1",
+  "shape": [
+    81
+  ],
+  "dtype": "float64",
+  "logt_npy": "hri174_logt.npy",
+  "src_min": 1.6556870934196936e-29,
+  "src_max": 2.6983857310815444e-24,
+  "dst_min": 2.317961930787571e-29,
+  "dst_max": 3.777740023514162e-24,
+  "reference": "Shestov et al. 2025, In-flight cross-calibration of HRI_EUV/EUI and AIA/SDO; report-Shestov2025.md",
+  "cal_uncertainty": "+/- ~14% (k spans 1.4-1.6 across 3 conjunctions)",
+  "written": "2026-05-18T16:06:49.136551Z"
+}

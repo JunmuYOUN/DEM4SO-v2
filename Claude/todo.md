@@ -30,6 +30,10 @@
   * `resp_concat_EUI_factor0.6.npy` — 합성 EUI 6채널 (94/131/**174**/193/211/335)
   * `resp_concat_FSI_factor0.{5,6,7}_rev1.npy` — FSI 6채널 (Phase 5에서 사용)
   * temperature grid: `tresp_logt = np.linspace(4, 8, 81)`, `T_bins = 10**arange(4,8,0.1)` (40개)
+* 본 연구의 HRI 174 응답: `Claude/responses/hri174_response.npy`
+  (CHIANTI G(T,Ne=1e9), unit `[DN cm^5 s^-1 px^-1]`).
+  → **DEM 입력에는 Shestov+2025 cross-cal 적용된 `hri174_response_k1p4.npy` (= ×1.4) 사용**.
+  보정 인자 `k = 1.4` 의 출처/불확실도(~±14 %) 는 `Claude/related-paper/report-Shestov2025.md` 참고.
 * Reference 논문: Youn et al., *Can we properly determine DEM from Solar Orbiter/EUI/FSI
   with deep learning?* — Phase 5에서 reference로 사용.
 * Conjunction 후보 (Conj_front, Solar Orbiter ↔ SDO 정렬):
