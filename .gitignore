@@ -27,3 +27,6 @@ Claude/**/*.png
 Claude/**/*.jpg
 Claude/**/*.pdf
 Claude/**/*.pkl
+
+# Exception: small response-function snapshots are part of the source-of-truth
+!Claude/responses/*.npy
