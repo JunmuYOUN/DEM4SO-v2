@@ -1,0 +1,11 @@
+Results from 1 Provider:
+
+3 Results from the SOARClient:
+
+Instrument     Data product    ... Filesize
+                               ...  Mbyte  
+---------- ------------------- ... --------
+       EUI eui-hrieuv174-image ...    4.427
+       EUI eui-hrieuv174-image ...    4.447
+       EUI eui-hrieuv174-image ...    4.476
+

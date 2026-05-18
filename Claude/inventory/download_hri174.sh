@@ -23,7 +23,7 @@ mkdir -p "$DEST_ROOT"
 : > "$LOG"
 
 # CSV columns: conj,time_utc,year,month,day,relpath,url
-tail -n +2 "$CSV" | awk -F, '{print $3","$4","$5","$6","$7}' \
+tail -n +2 "$CSV" | tr -d '\r' | awk -F, '{print $3","$4","$5","$6","$7}' \
 | xargs -P "$PARALLEL" -I {} bash -c '
     IFS=, read -r year month day rel url <<<"{}"
     fname="$(basename "$rel")"

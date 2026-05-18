@@ -19,7 +19,7 @@
   * `resp_concat_EUI_factor0.6.npy` — 합성 EUI 6채널 (94/131/**174**/193/211/335)
   * `resp_concat_FSI_factor0.{5,6,7}_rev1.npy` — FSI 6채널 (Phase 5에서 사용)
   * temperature grid: `tresp_logt = np.linspace(4, 8, 81)`, `T_bins = 10**arange(4,8,0.1)` (40개)
-* Reference 논문: Wright et al., *Can we properly determine DEM from Solar Orbiter/EUI/FSI
+* Reference 논문: Youn et al., *Can we properly determine DEM from Solar Orbiter/EUI/FSI
   with deep learning?* — Phase 5에서 reference로 사용.
 * Conjunction 후보 (Conj_front, Solar Orbiter ↔ SDO 정렬):
   * 2022-03-07 08:33  (separation ≈ TBD)

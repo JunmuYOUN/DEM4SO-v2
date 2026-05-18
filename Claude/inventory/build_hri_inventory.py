@@ -1,11 +1,12 @@
 """
 Build a download inventory of HRI 174 L1 files for the four target conjunctions.
 
-Selection rule (matches Phase 1-2 / Phase 4 of Claude/todo.md):
+Selection rule (per user direction 2026-05-18, supersedes earlier +/-2h plan):
   * channel : hrieuv174 (image), L1
-  * window  : conjunction time +/- 2 hours
-  * cadence : at most one frame per minute (the earliest frame whose YYYYMMDDThhmm
-              bucket is empty wins).
+  * window  : conjunction date +/- 7 days
+  * cadence : at most one frame per UTC day (the earliest frame on that date wins).
+              Time-of-day is irrelevant; AIA pairs will be matched to the chosen
+              HRI obstime later.
 
 Inputs
 ------
@@ -27,8 +28,7 @@ from pathlib import Path
 
 FILE_LIST    = Path("/userhome/youn_j/Dataset/files_L1.txt")
 RELEASE_URL  = "https://www.sidc.be/EUI/data/releases/202510_release_7.0"
-WINDOW       = timedelta(hours=2)
-CADENCE_BIN  = timedelta(minutes=1)
+WINDOW       = timedelta(days=7)
 OUT_DIR      = Path(__file__).resolve().parent
 CSV_PATH     = OUT_DIR / "hri174_download_list.csv"
 SUMMARY_PATH = OUT_DIR / "hri174_download_list.summary.txt"
@@ -49,7 +49,7 @@ PATTERN = re.compile(
 
 def main() -> None:
     windows = {tag: (c - WINDOW, c + WINDOW) for tag, c in CONJUNCTIONS.items()}
-    # per-conjunction: minute-bucket -> first matching (datetime, relpath)
+    # per-conjunction: date-bucket -> earliest matching (datetime, relpath)
     buckets: dict[str, dict[datetime, tuple[datetime, str, str, str, str]]] = {
         tag: {} for tag in CONJUNCTIONS
     }
@@ -66,10 +66,11 @@ def main() -> None:
             for tag, (lo, hi) in windows.items():
                 if not (lo <= ts <= hi):
                     continue
-                minute = ts.replace(second=0, microsecond=0)
-                if minute in buckets[tag]:
-                    continue  # already have a frame in this minute bucket
-                buckets[tag][minute] = (ts, m["y"], m["m"], m["d"], m["rel"].lstrip("./"))
+                day = ts.replace(hour=0, minute=0, second=0, microsecond=0)
+                existing = buckets[tag].get(day)
+                if existing is not None and existing[0] <= ts:
+                    continue  # we already have an earlier frame on this date
+                buckets[tag][day] = (ts, m["y"], m["m"], m["d"], m["rel"].lstrip("./"))
 
     rows: list[dict[str, str]] = []
     for tag in CONJUNCTIONS:
@@ -85,9 +86,10 @@ def main() -> None:
                 "url":      f"{RELEASE_URL}/{rel}",
             })
 
+    fieldnames = list(rows[0].keys()) if rows else \
+        ["conj","time_utc","year","month","day","relpath","url"]
     with CSV_PATH.open("w", newline="") as fh:
-        writer = csv.DictWriter(fh, fieldnames=list(rows[0].keys()) if rows else
-                                ["conj","time_utc","year","month","day","relpath","url"])
+        writer = csv.DictWriter(fh, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
