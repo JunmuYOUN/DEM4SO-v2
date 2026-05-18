@@ -1,6 +1,17 @@
 # DEM4SO-v2 Research Plan
 
-> Question: *AIA 6채널 DEM에 EUI/HRI 174를 한 채널 추가하면 DEM 결과가 얼마나 달라지는가? 그리고 달라진다면 그 원인은 무엇인가?*
+> Question: *AIA(또는 AIA-like-EUI) 6채널 DEM에 HRI 174를 한 채널 추가했을 때
+> 소규모 구조 (campfire, nanoflare 등) 위치에서 DEM 결과가 얼마나 달라지며,
+> 달라진다면 그 원인은 무엇인가?*
+
+**역할 분담 (2026-05-18 사용자 추가 지침)**
+
+* **AIA / AIA-like-EUI** — *background*. 큰 FOV로 corona의 광역 온도 구조
+  (active region 전체, network, supergranular cell 등) 를 받쳐주는 역할.
+  HRI 격자에 reproject 되어 7채널 DEM의 "넓은 영역" 컨텍스트를 제공한다.
+* **HRI 174** — *fine-scale probe*. 같은 격자에서 ~100 km 분해능으로 campfire
+  (수 Mm, 수 분 lifetime), nanoflare 후보 (서브-Mm, 수십 초) 등을 분해한다.
+  DEM 결과 평가 ROI는 **이러한 작은 구조 중심**으로 선정한다.
 
 `AIA-like-EUI(174+304→6ch) + HRI174` 합성 7채널 DEM은 **Phase 5**에서 별도 트랙으로
 다루며, 우선 **AIA 진본 6ch vs (AIA 6ch + HRI174 = 7ch)** 차이를 정량화한다.
@@ -84,11 +95,19 @@
 - [ ] **2-5. 비교/저장**
   * `Claude/pipeline/compare.py`
     * pixel-wise DEM 차이 통계 (median ratio per logT, χ² 분포, peak T shift,
-      EM 적분 차이).
+      EM 적분 차이) — **HRI 격자 전체 + 작은-구조 마스크 안쪽** 두 가지로 따로 집계.
     * 저장: `outputs/<date>/<roi>/dem_aia6.npz`, `dem_aia7.npz`, `compare.json`.
-- [ ] **2-6. 1개 conjunction (2022-03-07) 으로 end-to-end smoke test**
+- [ ] **2-6. Small-structure 마스크 / ROI 추출기**
+  * `Claude/pipeline/feature_mask.py`
+    * `find_campfire_candidates(hri_map)` — HRI 174에서 unsharp / running-difference
+      기반으로 작은 (≲ 5 Mm) brightening detection. 우선 단순 threshold +
+      connected-component 로 시작 (Berghmans+ 2021 식 정의 참고).
+    * `roi_around(coord, half_size_pix)` — 그 후보 주변 (예: 64×64 픽셀) 잘라내
+      Phase 2-5 비교의 입력으로 쓴다.
+- [ ] **2-7. 1개 conjunction (2022-03-07) 으로 end-to-end smoke test**
   * 산출물: `Claude/notebooks/2022-03-07_smoke.ipynb` — pipeline 함수를 호출만 하는
-    가벼운 노트북. ROI 1개, 결과 figure 3장 (input, DEM AIA6, DEM AIA7, diff).
+    가벼운 노트북. ROI 1개 (campfire 후보 1개), figure 4장
+    (HRI input, AIA reproject input, DEM AIA6, DEM AIA7, diff @ campfire 위치).
 
 ---
 
@@ -102,16 +121,26 @@
     선정 → 총 10–12 케이스.
   * 산출물: `Claude/study_separation/cases.yaml`.
 - [ ] **3-2. 일괄 실행**
-  * `Claude/study_separation/run_all.py` → 각 케이스의 동일 helio-feature ROI(가능하면
-    quiet sun / coronal hole / AR loop foot 3종)에 대해 Phase 2 파이프라인 실행.
-  * 산출물: `outputs/separation/<sep_deg>/<date>/<roi>/...`.
+  * `Claude/study_separation/run_all.py` → 각 케이스에서 **HRI 174 frame 안의
+    campfire 후보 N개** 를 자동 추출 (Phase 2-6 마스크) 한 뒤, 그 ROI에서
+    AIA-only DEM 과 AIA+HRI174 DEM 을 모두 돌린다.
+  * 비교 baseline: 같은 conjunction 안의 quiet 영역 (HRI 의 low-variance 패치)
+    에서의 DEM 차이.
+  * 산출물: `outputs/separation/<sep_deg>/<date>/<campfire_id>/...`.
 - [ ] **3-3. 분석/시각화**
-  * separation vs (DEM peak T shift, EM 차이, χ² 차이) scatter.
+  * separation vs (campfire 위치 DEM peak T shift, EM 차이, χ² 차이) scatter,
+    quiet 영역의 동일 지표와 함께 plot — separation이 quiet에는 영향이 적고
+    small-feature 에는 크게 영향을 주는지 본다.
   * 산출물: `Claude/study_separation/analyze.ipynb`, `Claude/study_separation/figs/`.
 
 가설 / 메모:
-* separation이 커지면 LOS가 달라져 동일 구조라도 column emission이 달라짐 → AIA+HRI 가
-  본질적으로 *다른* plasma column 을 보게 되므로 DEM 차이가 커질 것.
+* HRI는 ~100 km 분해능에서 campfire/nanoflare 의 hot kernel 을 분리해낸다.
+  AIA-only 는 그 kernel 을 ~440 km/px 빔에 평균하여 hot tail 을 *희석* 시키므로,
+  AIA+HRI 의 DEM 은 같은 위치에서 더 높은 logT (≳ 6.4) 의 component 를 더 잘
+  살릴 가능성이 있다.
+* separation 이 커지면 LOS 가 달라져 동일 구조라도 column emission 이 달라짐 →
+  AIA+HRI 가 본질적으로 *다른* plasma column 을 보게 되므로 small-feature
+  DEM 차이가 더 커질 것. quiet 영역은 LOS 적분이 두꺼워서 상대적으로 둔감.
 * "*같은 픽셀*" 비교는 reproject 가 동일 위치를 가정하므로, separation 이 커질수록
   reproject 자체의 모호성이 증가 → 그 효과도 함께 보고할 것.
 
@@ -122,12 +151,17 @@
 목표: EUI(=HRI174) 시각 t에 대해 AIA를 t + Δt (Δt ∈ {-60, -30, 0, +30, +60} min) 으로
 가져왔을 때 7ch DEM 이 어떻게 변하는지.
 
-- [ ] **4-1. 1 conjunction 픽스 (가장 데이터 풍부: 2024-03-20)**
-- [ ] **4-2. 동일 ROI 3종 × Δt 5종 = 15 케이스**
+- [ ] **4-1. 1 conjunction 픽스 (가장 데이터 풍부: 2022-03-07 ; 2024-03-20 은 HRI block 단 1개)**
+- [ ] **4-2. 동일 campfire ROI 3종 × Δt 5종 = 15 케이스**
   * `Claude/study_time_offset/run_offset.py`.
+  * campfire 의 lifetime 이 보통 5–60 분 사이라는 점이 핵심 — Δt = ±30, ±60 분이면
+    같은 frame 안의 campfire 가 *AIA 쪽에서는 이미 사라졌거나 아직 안 떴을* 가능성이
+    높다. 이 효과가 DEM 의 hot-tail 에 어떻게 들어오는지 본다.
 - [ ] **4-3. 결과 figure**
   * Δt vs DEM 차이 통계 (Phase 3 와 같은 metric).
-  * AR loop의 빠른 진화 영역과 quiet sun 영역에서 차이가 다른지 비교.
+  * **campfire 위치** vs **quiet 위치** 의 차이 분리 — quiet 은 시간 변화가 작아
+    Δt 에 둔감해야 하고, campfire 는 Δt 가 커질수록 hot component 가 사라지는
+    방향으로 차이가 커져야 한다는 예측.
 * 산출물: `Claude/study_time_offset/analyze.ipynb`.
 
 ---
@@ -144,6 +178,8 @@ Phase 1–4 결과 정리 *이후* 진행. 이 단계는 별도 phase로 분리�
 - [ ] **5-3. (AIA+HRI174) vs (AIA-like-EUI+HRI174) 비교**
   * 동일 logT bin에서 DEM 비율, peak shift, EM 적분 차이.
   * 기대: 합성 모델 noise / channel cross-talk 효과를 분리할 수 있어야 함.
+* 의미: AIA가 직접 볼 수 없는 conjunction-off 시점에도 합성-EUI 가 background 역할을
+  대신 해줄 수 있는지 검증 — 즉 *HRI 만의 시점에서도* DEM 이 가능한지의 토대.
 
 ---
 
@@ -175,6 +211,7 @@ Code_V3/Claude/
 │   ├── coregister.py
 │   ├── dem_setup.py
 │   ├── dem_run.py
+│   ├── feature_mask.py            ← campfire/nanoflare 후보 검출
 │   └── compare.py
 ├── notebooks/
 │   └── 2022-03-07_smoke.ipynb
@@ -194,3 +231,8 @@ Code_V3/Claude/
 ## 진행 메모 / 의사결정 로그
 
 * 2026-05-18 : repo 초기화, 본 plan 작성. 다음 작업은 Phase 1-1, 1-2.
+* 2026-05-18 : Phase 1-2 (HRI L1 inventory ±1 week 1/day) + SOAR 쿼리 + AIA pair
+  다운로드 시작. 합성 plan 변경 — *AIA / AIA-like-EUI 는 background, HRI 는 작은
+  구조 (campfire, nanoflare) 의 fine-scale probe* 로 역할 분담. Phase 2-6
+  small-structure 마스크 단계 추가, Phase 3/4 의 ROI 선정 기준을 campfire 중심으로
+  바꿈.
