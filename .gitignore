@@ -1,0 +1,29 @@
+# --- safety: ignore everything by default, whitelist what we want ---
+*
+
+# --- but track these ---
+!.gitignore
+!README.md
+!Claude/
+!Claude/**
+
+# Inside Claude/, still skip noisy artifacts
+Claude/**/__pycache__/
+Claude/**/*.pyc
+Claude/**/.ipynb_checkpoints/
+Claude/**/.cache/
+Claude/**/runs/
+Claude/**/outputs/
+Claude/**/output/
+Claude/**/results/
+Claude/**/cache/
+Claude/**/*.fits
+Claude/**/*.fts
+Claude/**/*.npy
+Claude/**/*.npz
+Claude/**/*.h5
+Claude/**/*.hdf5
+Claude/**/*.png
+Claude/**/*.jpg
+Claude/**/*.pdf
+Claude/**/*.pkl
