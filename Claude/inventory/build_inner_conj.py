@@ -48,6 +48,9 @@ CONJUNCTIONS: list[tuple[str, datetime, bool, float]] = [
     ("20240320T0840", datetime(2024, 3, 20,  8, 40), False, 282.74),  # no HRI near conj
     ("20250313T2030", datetime(2025, 3, 13, 20, 30), True,  267.18),
     ("20251007T1700", datetime(2025, 10, 7, 17,  0), False, 250.05),  # no HRI near conj
+    # Extra user-requested 3-instrument combos (not strict inner conjunctions
+    # but near enough that the light-time correction is essentially constant).
+    ("20230328T2100", datetime(2023, 3, 28, 21,  0), True,  297.57),
 ]
 
 # ---------------------------------------------------------------- patterns
