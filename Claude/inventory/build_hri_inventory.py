@@ -10,7 +10,7 @@ Selection rule (per user direction 2026-05-18, supersedes earlier +/-2h plan):
 
 Inputs
 ------
-* /userhome/youn_j/Dataset/files_L1.txt   (SIDC release 7.0 file listing)
+* /userhome/youn_j/Dataset_V2/RAW/files_L1.txt   (SIDC release 7.0 file listing)
 
 Outputs (next to this script)
 -----------------------------
@@ -26,7 +26,7 @@ import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
-FILE_LIST    = Path("/userhome/youn_j/Dataset/files_L1.txt")
+FILE_LIST    = Path("/userhome/youn_j/Dataset_V2/RAW/files_L1.txt")
 RELEASE_URL  = "https://www.sidc.be/EUI/data/releases/202510_release_7.0"
 WINDOW       = timedelta(days=7)
 OUT_DIR      = Path(__file__).resolve().parent

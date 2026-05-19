@@ -1,7 +1,7 @@
 """
 For each EUI_Gen folder under /userhome/youn_j/DEM/Testset/EUI_Gen/<DATE>T<HHMM>/,
 find the nearest hrieuv174 L1 frame in SIDC release 7.0 by parsing
-/userhome/youn_j/Dataset/files_L1.txt. Download the file if not already on
+/userhome/youn_j/Dataset_V2/RAW/files_L1.txt. Download the file if not already on
 disk under /userhome/youn_j/Dataset/DEM4SO-v2/hrieuv174/YYYY/MM/DD/, then
 hard-link or copy it into /userhome/youn_j/DEM/Testset/HRI174/<DATE>T<HHMM>/.
 """
@@ -18,7 +18,7 @@ from pathlib import Path
 EUI_GEN_ROOT = Path("/userhome/youn_j/DEM/Testset/EUI_Gen")
 HRI_OUT_ROOT = Path("/userhome/youn_j/DEM/Testset/HRI174")
 HRI_DISK_ROOT = Path("/userhome/youn_j/Dataset/DEM4SO-v2/hrieuv174")
-FILE_LIST    = Path("/userhome/youn_j/Dataset/files_L1.txt")
+FILE_LIST    = Path("/userhome/youn_j/Dataset_V2/RAW/files_L1.txt")
 RELEASE_URL  = "https://www.sidc.be/EUI/data/releases/202510_release_7.0"
 
 PATTERN = re.compile(
